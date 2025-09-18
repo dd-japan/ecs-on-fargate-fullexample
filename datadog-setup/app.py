@@ -6,10 +6,6 @@ import os
 import uuid
 import sys
 
-# Initialize Datadog tracing BEFORE Flask app
-from ddtrace import patch_all, tracer
-patch_all()
-
 # Initialize Flask app
 app = Flask(__name__)
 
