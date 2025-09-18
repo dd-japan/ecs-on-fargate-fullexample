@@ -39,4 +39,6 @@ EXPOSE 8000
 #     CMD curl -f http://localhost:8000/health || exit 1
 
 # Alternative: Use python -m ddtrace.commands.ddtrace_run instead of ddtrace-run
+# CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--workers", "1", "--timeout", "30", "--keep-alive", "2", "--max-requests", "1000", "app:app"]
+# [Datadog][APM]use ddtrace-run to wrap all the requests
 CMD ["ddtrace-run", "gunicorn", "--bind", "0.0.0.0:8000", "--workers", "1", "--timeout", "30", "--keep-alive", "2", "--max-requests", "1000", "app:app"]
