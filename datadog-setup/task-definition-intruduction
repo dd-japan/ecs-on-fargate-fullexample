@@ -1,0 +1,229 @@
+{
+    "family": "python-api-task",
+    "containerDefinitions": [
+        {
+            "name": "cws-instrumentation-init",
+            "image": "public.ecr.aws/datadog/cws-instrumentation:latest",
+            "essential": false,
+            "user": "0",
+            "command": [
+                "/cws-instrumentation",
+                "setup",
+                "--cws-volume-mount",
+                "/cws-instrumentation-volume"
+            ],
+            "mountPoints": [
+                {
+                    "sourceVolume": "cws-instrumentation-volume",
+                    "containerPath": "/cws-instrumentation-volume",
+                    "readOnly": false
+                }
+            ]
+        },
+        {
+            "cpu": 0,
+            "dependsOn": [
+                {
+                    "condition": "HEALTHY",
+                    "containerName": "datadog-agent"
+                },
+                {
+                    "containerName": "cws-instrumentation-init",
+                    "condition": "SUCCESS"
+                }
+            ],
+            "environment": [
+                {
+                    "name": "DD_IAST_ENABLED",
+                    "value": "true"
+                },
+                {
+                    "name": "PORT",
+                    "value": "8000"
+                },
+                {
+                    "name": "DD_APPSEC_ENABLED",
+                    "value": "true"
+                },
+                {
+                    "name": "ENVIRONMENT",
+                    "value": "demo"
+                },
+                {
+                    "name": "DD_SERVICE",
+                    "value": "ecs-python-api"
+                },
+                {
+                    "name": "DD_LOGS_INJECTION",
+                    "value": "true"
+                },
+                {
+                    "name": "DD_ENV",
+                    "value": "demo"
+                },
+                {
+                    "name": "DD_PROFILING_ENABLED",
+                    "value": "true"
+                },
+                {
+                    "name": "DD_APPSEC_SCA_ENABLED",
+                    "value": "true"
+                }
+            ],
+            "essential": true,
+            "healthCheck": {
+                "command": [
+                    "CMD-SHELL",
+                    "curl -f http://localhost:8000/health || exit 1"
+                ],
+                "interval": 30,
+                "retries": 5,
+                "startPeriod": 120,
+                "timeout": 15
+            },
+            "image": "<python-api-image-url>",
+            "logConfiguration": {
+                "logDriver": "awsfirelens",
+                "options": {
+                  "Name": "datadog",
+                  "apikey": "<datadog-api-key>",
+                  "Host": "<datadog-site>",
+                  "dd_service": "ecs-python-api",
+                  "dd_source": "python",
+                  "dd_message_key": "log",
+                  "dd_tags": "use:demo,arch:ecs_fargate",
+                  "TLS": "on",
+                  "provider": "ecs"
+                }
+            },
+            "memory": 512,
+            "mountPoints": [
+                {
+                    "sourceVolume": "cws-instrumentation-volume",
+                    "containerPath": "/cws-instrumentation-volume",
+                    "readOnly": true
+                }
+            ],
+            "name": "python-api-container",
+            "portMappings": [
+                {
+                    "containerPort": 8000,
+                    "name": "python-api-container-8000-tcp",
+                    "protocol": "tcp"
+                }
+            ],
+            "systemControls": [],
+            "volumesFrom": [],
+            "entryPoint": [
+                "/cws-instrumentation-volume/cws-instrumentation",
+                "trace",
+                "--"
+            ],
+            "command": [
+                "ddtrace-run",
+                "gunicorn",
+                "--bind", "0.0.0.0:8000",
+                "--workers", "1",
+                "--timeout", "30",
+                "--keep-alive", "2",
+                "--max-requests", "1000",
+                "app:app"
+            ]
+        },
+        {
+            "cpu": 0,
+            "environment": [
+                {
+                    "name": "DD_APM_NON_LOCAL_TRAFFIC",
+                    "value": "true"
+                },
+                {
+                    "name": "DD_API_KEY",
+                    "value": "<datadog-api-key>"
+                },
+                {
+                    "name": "DD_SITE",
+                    "value": "<datadog-site>"
+                },
+                {
+                    "name": "DD_PROCESS_AGENT_PROCESS_COLLECTION_ENABLED",
+                    "value": "true"
+                },
+                {
+                    "name": "ECS_FARGATE",
+                    "value": "true"
+                },
+                {
+                    "name": "DD_APM_ENABLED",
+                    "value": "true"
+                },
+                {
+                    "name": "SERVICE",
+                    "value": "ecs-python-api"
+                },
+                {
+                    "name": "ENV",
+                    "value": "demo"
+                },
+                {
+                    "name": "DD_RUNTIME_SECURITY_CONFIG_ENABLED",
+                    "value": "true"
+                },
+                {
+                    "name": "DD_RUNTIME_SECURITY_CONFIG_EBPFLESS_ENABLED",
+                    "value": "true"
+                }
+            ],
+            "essential": true,
+            "healthCheck": {
+                "command": [
+                    "CMD-SHELL",
+                    "/probe.sh"
+                ],
+                "interval": 30,
+                "retries": 2,
+                "startPeriod": 60,
+                "timeout": 5
+            },
+            "image": "public.ecr.aws/datadog/agent:latest",
+            "memory": 256,
+            "mountPoints": [],
+            "name": "datadog-agent",
+            "portMappings": [],
+            "systemControls": [],
+            "volumesFrom": []
+        },
+        {
+            "essential": true,
+            "image": "amazon/aws-for-fluent-bit:stable",
+            "name": "log_router",
+            "firelensConfiguration": {
+              "type": "fluentbit",
+              "options": {
+                "enable-ecs-log-metadata": "true",
+                "config-file-type": "file",
+                "config-file-value": "/fluent-bit/configs/parse-json.conf"
+              }
+            }
+          }
+    ],
+    "taskRoleArn": "<ecstaskrole-arn>",
+    "executionRoleArn": "<ecstaskexecutionrole-arn>",
+    "networkMode": "awsvpc",
+    "volumes": [
+        {
+            "name": "cws-instrumentation-volume"
+        }
+    ],
+    "placementConstraints": [],
+    "requiresCompatibilities": [
+        "FARGATE"
+    ],
+    "cpu": "512",
+    "memory": "1024",
+    "pidMode": "task",
+    "runtimePlatform": {
+        "cpuArchitecture": "X86_64",
+        "operatingSystemFamily": "LINUX"
+    }
+}
