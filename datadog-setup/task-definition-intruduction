@@ -1,76 +1,80 @@
+### This file is used for detailed instruction of the ecs-task-definition-datadog.json 
+to show you where need to be modified and how for each Datadog feature.
+### For the Datadog API key, we suggest you to use AWS Secret Manager instead of plaintext for security condideration.
+
 {
     "family": "python-api-task",
     "containerDefinitions": [
-        {
-            "name": "cws-instrumentation-init",
-            "image": "public.ecr.aws/datadog/cws-instrumentation:latest",
-            "essential": false,
-            "user": "0",
-            "command": [
-                "/cws-instrumentation",
-                "setup",
-                "--cws-volume-mount",
-                "/cws-instrumentation-volume"
-            ],
-            "mountPoints": [
-                {
-                    "sourceVolume": "cws-instrumentation-volume",
-                    "containerPath": "/cws-instrumentation-volume",
-                    "readOnly": false
-                }
-            ]
-        },
-        {
-            "cpu": 0,
-            "dependsOn": [
-                {
-                    "condition": "HEALTHY",
-                    "containerName": "datadog-agent"
-                },
-                {
-                    "containerName": "cws-instrumentation-init",
-                    "condition": "SUCCESS"
-                }
+        {                                                                              # [Datadog][Cloud Security]To enable Workload Security
+            "name": "cws-instrumentation-init",                                        # [Datadog][Cloud Security]To enable Workload Security
+            "image": "public.ecr.aws/datadog/cws-instrumentation:latest",              # [Datadog][Cloud Security]To enable Workload Security
+            "essential": false,                                                        # [Datadog][Cloud Security]To enable Workload Security
+            "user": "0",                                                               # [Datadog][Cloud Security]To enable Workload Security
+            "command": [                                                               # [Datadog][Cloud Security]To enable Workload Security
+                "/cws-instrumentation",                                                # [Datadog][Cloud Security]To enable Workload Security
+                "setup",                                                               # [Datadog][Cloud Security]To enable Workload Security
+                "--cws-volume-mount",                                                  # [Datadog][Cloud Security]To enable Workload Security
+                "/cws-instrumentation-volume"                                          # [Datadog][Cloud Security]To enable Workload Security
+            ],                                                                         # [Datadog][Cloud Security]To enable Workload Security
+            "mountPoints": [                                                           # [Datadog][Cloud Security]To enable Workload Security
+                {                                                                      # [Datadog][Cloud Security]To enable Workload Security
+                    "sourceVolume": "cws-instrumentation-volume",                      # [Datadog][Cloud Security]To enable Workload Security
+                    "containerPath": "/cws-instrumentation-volume",                    # [Datadog][Cloud Security]To enable Workload Security
+                    "readOnly": false                                                  # [Datadog][Cloud Security]To enable Workload Security
+                }                                                                      # [Datadog][Cloud Security]To enable Workload Security
+            ]                                                                          # [Datadog][Cloud Security]To enable Workload Security
+        },                                                                             # [Datadog][Cloud Security]To enable Workload Security
+        {                                                                              
+            "cpu": 0,                                                                   
+            "dependsOn": [                                                            
+                {                                                                      # [Datadog][Agent][Optional]Make sure the agent is running
+                    "condition": "HEALTHY",                                            # [Datadog][Agent][Optional]Make sure the agent is running 
+                    "containerName": "datadog-agent"                                   # [Datadog][Agent][Optional]Make sure the agent is running
+                },                                                                     # [Datadog][Agent][Optional]Make sure the agent is running
+                {                                                                      # [Datadog][Agent]Must when Workload Security is required
+                    "containerName": "cws-instrumentation-init",                       # [Datadog][Agent]Must when Workload Security is required
+                    "condition": "SUCCESS"                                             # [Datadog][Agent]Must when Workload Security is required
+                }                                                                      # [Datadog][Agent]Must when Workload Security is required
             ],
             "environment": [
-                {
-                    "name": "DD_IAST_ENABLED",
-                    "value": "true"
-                },
-                {
+                {                                                                      # [Datadog][APM][Optional]To enable IAST
+                    "name": "DD_IAST_ENABLED",                                         # [Datadog][APM][Optional]To enable IAST
+                    "value": "true"                                                    # [Datadog][APM][Optional]To enable IAST
+                },                                                                     # [Datadog][APM][Optional]To enable IAST
+                {                                    
                     "name": "PORT",
                     "value": "8000"
                 },
-                {
-                    "name": "DD_APPSEC_ENABLED",
-                    "value": "true"
-                },
+                {                                                                      # [Datadog][APM][Optional]To enable APP&API Protection
+                    "name": "DD_APPSEC_ENABLED",                                       # [Datadog][APM][Optional]To enable APP&API Protection
+                    "value": "true"                                                    # [Datadog][APM][Optional]To enable APP&API Protection
+                },                                                                     # [Datadog][APM][Optional]To enable APP&API Protection
                 {
                     "name": "ENVIRONMENT",
                     "value": "demo"
                 },
-                {
-                    "name": "DD_SERVICE",
-                    "value": "ecs-python-api"
-                },
-                {
-                    "name": "DD_LOGS_INJECTION",
-                    "value": "true"
-                },
-                {
-                    "name": "DD_ENV",
-                    "value": "demo"
-                },
-                {
-                    "name": "DD_PROFILING_ENABLED",
-                    "value": "true"
-                },
-                {
-                    "name": "DD_APPSEC_SCA_ENABLED",
-                    "value": "true"
-                }
+                {                                                                      # [Datadog][APM]To set the service name
+                    "name": "DD_SERVICE",                                              # [Datadog][APM]To set the service name    
+                    "value": "ecs-python-api"                                          # [Datadog][APM]To set the service name
+                },                                                                     # [Datadog][APM]To set the service name
+                {                                                                      # [Datadog][APM][Optinal]To connect logs to trace              
+                    "name": "DD_LOGS_INJECTION",                                       # [Datadog][APM][Optinal]To connect logs to trace
+                    "value": "true"                                                    # [Datadog][APM][Optinal]To connect logs to trace
+                },                                                                     # [Datadog][APM][Optinal]To connect logs to trace
+                {                                                                      # [Datadog][APM]To set the env name
+                    "name": "DD_ENV",                                                  # [Datadog][APM]To set the env name
+                    "value": "demo"                                                    # [Datadog][APM]To set the env name       
+                },                                                                     # [Datadog][APM]To set the env name
+                {                                                                      # [Datadog][APM][Optinal]To enable profiler
+                    "name": "DD_PROFILING_ENABLED",                                    # [Datadog][APM][Optinal]To enable profiler
+                    "value": "true"                                                    # [Datadog][APM][Optinal]To enable profiler
+                },                                                                     # [Datadog][APM][Optinal]To enable profiler
+                {                                                                      # [Datadog][APM][Optional]To enable SCA
+                    "name": "DD_APPSEC_SCA_ENABLED",                                   # [Datadog][APM][Optional]To enable SCA
+                    "value": "true"                                                    # [Datadog][APM][Optional]To enable SCA
+                }                                                                      # [Datadog][APM][Optional]To enable SCA
             ],
-            "essential": true,
+            "essential": true,                                                         
             "healthCheck": {
                 "command": [
                     "CMD-SHELL",
@@ -82,27 +86,27 @@
                 "timeout": 15
             },
             "image": "<python-api-image-url>",
-            "logConfiguration": {
-                "logDriver": "awsfirelens",
-                "options": {
-                  "Name": "datadog",
-                  "apikey": "<datadog-api-key>",
-                  "Host": "<datadog-site>",
-                  "dd_service": "ecs-python-api",
-                  "dd_source": "python",
-                  "dd_message_key": "log",
-                  "dd_tags": "use:demo,arch:ecs_fargate",
-                  "TLS": "on",
-                  "provider": "ecs"
-                }
+            "logConfiguration": {                       
+                "logDriver": "awsfirelens",                                             # [Datadog][Logs]To collect container logs
+                "options": {                                                            # [Datadog][Logs]To collect container logs
+                  "Name": "datadog",                                                    # [Datadog][Logs]To collect container logs
+                  "apikey": "<datadog-api-key>",                                        # [Datadog][Logs]To collect container logs
+                  "Host": "<datadog-site>",                                             # [Datadog][Logs]To collect container logs
+                  "dd_service": "ecs-python-api",                                       # [Datadog][Logs]To collect container logs
+                  "dd_source": "python",                                                # [Datadog][Logs]To collect container logs
+                  "dd_message_key": "log",                                              # [Datadog][Logs]To collect container logs
+                  "dd_tags": "use:demo,arch:ecs_fargate",                               # [Datadog][Logs]To collect container logs
+                  "TLS": "on",                                                          # [Datadog][Logs]To collect container logs
+                  "provider": "ecs"                                                     # [Datadog][Logs]To collect container logs
+                }                                                                       # [Datadog][Logs]To collect container logs
             },
             "memory": 512,
             "mountPoints": [
-                {
-                    "sourceVolume": "cws-instrumentation-volume",
-                    "containerPath": "/cws-instrumentation-volume",
-                    "readOnly": true
-                }
+                {                                                                       # [Datadog][Cloud Security]To enable Workload Security
+                    "sourceVolume": "cws-instrumentation-volume",                       # [Datadog][Cloud Security]To enable Workload Security
+                    "containerPath": "/cws-instrumentation-volume",                     # [Datadog][Cloud Security]To enable Workload Security
+                    "readOnly": true                                                    # [Datadog][Cloud Security]To enable Workload Security
+                }                                                                       # [Datadog][Cloud Security]To enable Workload Security
             ],
             "name": "python-api-container",
             "portMappings": [
@@ -113,66 +117,63 @@
                 }
             ],
             "systemControls": [],
-            "volumesFrom": [],
-            "entryPoint": [
-                "/cws-instrumentation-volume/cws-instrumentation",
-                "trace",
-                "--"
-            ],
-            "command": [
-                "ddtrace-run",
-                "gunicorn",
-                "--bind", "0.0.0.0:8000",
-                "--workers", "1",
-                "--timeout", "30",
-                "--keep-alive", "2",
-                "--max-requests", "1000",
-                "app:app"
-            ]
+            "volumesFrom": [], 
+            "entryPoint": [                                                             # [Datadog][Cloud Security]To enable Workload Security
+                "/cws-instrumentation-volume/cws-instrumentation",                      # [Datadog][Cloud Security]To enable Workload Security
+                "trace",                                                                # [Datadog][Cloud Security]To enable Workload Security
+                "--"                                                                    # [Datadog][Cloud Security]To enable Workload Security
+            ],                                                                          # [Datadog][Cloud Security]To enable Workload Security
+            "command": [                                                                # [Datadog][Cloud Security]To enable Workload Security
+                "ddtrace-run",                                                          # [Datadog][Cloud Security]To enable Workload Security
+                "gunicorn",                                                             # [Datadog][Cloud Security]To enable Workload Security
+                "--bind", "0.0.0.0:8000",                                               # [Datadog][Cloud Security]To enable Workload Security
+                "--workers", "1",                                                       # [Datadog][Cloud Security]To enable Workload Security
+                "--timeout", "30",                                                      # [Datadog][Cloud Security]To enable Workload Security
+                "--keep-alive", "2",                                                    # [Datadog][Cloud Security]To enable Workload Security
+                "--max-requests", "1000",                                               # [Datadog][Cloud Security]To enable Workload Security
+                "app:app"                                                               # [Datadog][Cloud Security]To enable Workload Security
+            ]                                                                           # [Datadog][Cloud Security]To enable Workload Security
         },
-        {
-            "cpu": 0,
-            "environment": [
-                {
-                    "name": "DD_APM_NON_LOCAL_TRAFFIC",
-                    "value": "true"
-                },
-                {
-                    "name": "DD_API_KEY",
-                    "value": "<datadog-api-key>"
-                },
-                {
-                    "name": "DD_SITE",
-                    "value": "<datadog-site>"
-                },
-                {
-                    "name": "DD_PROCESS_AGENT_PROCESS_COLLECTION_ENABLED",
-                    "value": "true"
-                },
+# [Datadog][Agent]From here is the container definition of the Datadog Agent
+        {                                                                               
+            "cpu": 0,                                                                   
+            "environment": [                                                                             
+                {                                                                       # [Datadog][APM]To enable APM
+                    "name": "DD_APM_NON_LOCAL_TRAFFIC",                                 # [Datadog][APM]To enable APM
+                    "value": "true"                                                     # [Datadog][APM]To enable APM
+                },                                                                      # [Datadog][APM]To enable APM
+                {                                                                       # [Datadog][Agent]To set the Datadog API Key
+                    "name": "DD_API_KEY",                                               # [Datadog][Agent]To set the Datadog API Key
+                    "value": "<datadog-api-key>"                                        # [Datadog][Agent]To set the Datadog API Key
+                },                                                                      # [Datadog][Agent]To set the Datadog API Key
+                {                                                                       # [Datadog][Agent]To set the Datadog SITE
+                    "name": "DD_SITE",                                                  # [Datadog][Agent]To set the Datadog SITE
+                    "value": "<datadog-site>"                                           # [Datadog][Agent]To set the Datadog SITE
+                },                                                                      # [Datadog][Agent]To set the Datadog SITE
+                {                                                                       # [Datadog][Agent]To collect container processes
+                    "name": "DD_PROCESS_AGENT_PROCESS_COLLECTION_ENABLED",              # [Datadog][Agent]To collect container processes
+                    "value": "true"                                                     # [Datadog][Agent]To collect container processes
+                },                                                                      # [Datadog][Agent]To collect container processes
                 {
                     "name": "ECS_FARGATE",
                     "value": "true"
                 },
-                {
-                    "name": "DD_APM_ENABLED",
-                    "value": "true"
-                },
-                {
-                    "name": "SERVICE",
-                    "value": "ecs-python-api"
-                },
-                {
-                    "name": "ENV",
-                    "value": "demo"
-                },
-                {
-                    "name": "DD_RUNTIME_SECURITY_CONFIG_ENABLED",
-                    "value": "true"
-                },
-                {
-                    "name": "DD_RUNTIME_SECURITY_CONFIG_EBPFLESS_ENABLED",
-                    "value": "true"
-                }
+                {                                                                       # [Datadog][Agent]To enable APM
+                    "name": "DD_APM_ENABLED",                                           # [Datadog][Agent]To enable APM
+                    "value": "true"                                                     # [Datadog][Agent]To enable APM
+                },                                                                      # [Datadog][Agent]To enable APM
+                {                                                                       # [Datadog][Agent]To set env of the task
+                    "name": "ENV",                                                      # [Datadog][Agent]To set env of the task
+                    "value": "demo"                                                     # [Datadog][Agent]To set env of the task
+                },                                                                      # [Datadog][Agent]To set env of the task
+                {                                                                       # [Datadog][Cloud Security]To enable Cloud Security
+                    "name": "DD_RUNTIME_SECURITY_CONFIG_ENABLED",                       # [Datadog][Cloud Security]To enable Cloud Security
+                    "value": "true"                                                     # [Datadog][Cloud Security]To enable Cloud Security
+                },                                                                      # [Datadog][Cloud Security]To enable Cloud Security
+                {                                                                       # [Datadog][Cloud Security]To enable Vulnerability Scan
+                    "name": "DD_RUNTIME_SECURITY_CONFIG_EBPFLESS_ENABLED",              # [Datadog][Cloud Security]To enable Vulnerability Scan
+                    "value": "true"                                                     # [Datadog][Cloud Security]To enable Vulnerability Scan
+                }                                                                       # [Datadog][Cloud Security]To enable Vulnerability Scan
             ],
             "essential": true,
             "healthCheck": {
@@ -193,6 +194,8 @@
             "systemControls": [],
             "volumesFrom": []
         },
+# [Datadog][Agent]The container definition of the Datadog Agent ends here
+# [Datadog][Logs]From here is the container definition for the log router
         {
             "essential": true,
             "image": "amazon/aws-for-fluent-bit:stable",
@@ -206,14 +209,15 @@
               }
             }
           }
-    ],
+# [Datadog][Logs]The container definition for the log router ends here
+    ],                                                                                  
     "taskRoleArn": "<ecstaskrole-arn>",
     "executionRoleArn": "<ecstaskexecutionrole-arn>",
     "networkMode": "awsvpc",
     "volumes": [
-        {
-            "name": "cws-instrumentation-volume"
-        }
+        {                                                                                # [Datadog][Cloud Security]To enable Workload Security
+            "name": "cws-instrumentation-volume"                                         # [Datadog][Cloud Security]To enable Workload Security
+        }                                                                                # [Datadog][Cloud Security]To enable Workload Security
     ],
     "placementConstraints": [],
     "requiresCompatibilities": [
@@ -221,7 +225,7 @@
     ],
     "cpu": "512",
     "memory": "1024",
-    "pidMode": "task",
+    "pidMode": "task",                                                                   # [Datadog][Agent]To collect container processes
     "runtimePlatform": {
         "cpuArchitecture": "X86_64",
         "operatingSystemFamily": "LINUX"
