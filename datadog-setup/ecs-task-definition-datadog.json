@@ -81,13 +81,13 @@
                 "startPeriod": 120,
                 "timeout": 15
             },
-            "image": "369042512949.dkr.ecr.ap-northeast-1.amazonaws.com/python-api:latest",
+            "image": "<python-api-image-url>",
             "logConfiguration": {
                 "logDriver": "awsfirelens",
                 "options": {
                   "Name": "datadog",
-                  "apikey": "00c045a3d1096957c5a96dc25f8ec40c",
-                  "Host": "http-intake.logs.datadoghq.com",
+                  "apikey": "<datadog-api-key>",
+                  "Host": "<datadog-site>",
                   "dd_service": "ecs-python-api",
                   "dd_source": "python",
                   "dd_message_key": "log",
@@ -139,11 +139,11 @@
                 },
                 {
                     "name": "DD_API_KEY",
-                    "value": "00c045a3d1096957c5a96dc25f8ec40c"
+                    "value": "<datadog-api-key>"
                 },
                 {
                     "name": "DD_SITE",
-                    "value": "datadoghq.com"
+                    "value": "<datadog-site>"
                 },
                 {
                     "name": "DD_PROCESS_AGENT_PROCESS_COLLECTION_ENABLED",
@@ -207,8 +207,8 @@
             }
           }
     ],
-    "taskRoleArn": "arn:aws:iam::369042512949:role/cmse-fargate-ecstaskrole",
-    "executionRoleArn": "arn:aws:iam::369042512949:role/ecsTaskExecutionRole",
+    "taskRoleArn": "<ecstaskrole-arn>",
+    "executionRoleArn": "<ecstaskexecutionrole-arn>",
     "networkMode": "awsvpc",
     "volumes": [
         {
